@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_lot_label_inherit" inherit_id="stock.report_lot_label">
+        <xpath expr="//div[contains(@class, 'o_label_4x12') and @t-if='o.product_id.default_code']" position="before">
+            <div t-if="o.env.user.company_id.logo" style="text-align: left;">
+                <img t-att-src="'data:image/png;base64,' + o.env.user.company_id.logo.decode('utf-8')"
+                     style="width: 12%; float: right; padding-top: 0; padding-right: 0;"/>
+            </div>
+        </xpath>
+        <xpath expr="//div[contains(@class, 'o_label_4x12') and @t-if='o.product_id.default_code']" position="attributes">
+            <attribute name="t-att-style">'padding-top: 10px; ' + ('width:22mm;' if final_barcode else '')</attribute>
+        </xpath>
+        <xpath expr="//div[contains(@t-att-style, 'position:relative')]" position="attributes">
+            <attribute name="t-att-style">'position:relative; width:43mm; height:auto; border: 1px solid %s;' %
+                (o.env.user.company_id.primary_color or 'black')
+            </attribute>
+        </xpath>
+        <xpath expr="//div[@t-field='o.name']" position="replace">
+            <div class="o_label_4x12"
+                 t-att-style="'width:auto; white-space: normal !important; padding-top: 3px; padding-bottom: 3px; float:left;'">
+                <span>LOT:</span>
+                <span class="o_label_4x12" name="lot_name" t-field="o.name"
+                      t-att-style="'width:auto; white-space: normal' if final_barcode else ''">
+                    Demo Lot/SN
+                </span>
+            </div>
+            <div class="o_label_4x12"
+                 t-att-style="'width:auto; white-space: normal !important; padding-top: 3px; padding-bottom: 3px; float:right;'">
+
+                <t t-set="purchase_orders" t-value="o.env['purchase.order'].browse(o.mapped('purchase_order_ids.id'))"/>
+                <t t-if="purchase_orders">
+                    <div class="o_label_4x12"
+                         t-att-style="'width:auto; white-space: normal; margin:2px 0; font-size: 5px'">
+                        <b>
+                            <span>Date:</span>
+                        </b>
+                        <t t-set="order_date" t-value="purchase_orders[0].date_order if purchase_orders else False"/>
+                        <span t-esc="order_date and o.env['ir.qweb.field.date'].value_to_html(order_date, {}) or ''"/>
+                    </div>
+                </t>
+
+                <t t-set="stock_pickings"
+                   t-value="o.env['stock.picking'].browse(o.mapped('stock_valuation_layer_ids.stock_move_id.picking_id.id'))"/>
+                <t t-if="stock_pickings">
+                    <div class="o_label_4x12"
+                         t-att-style="'width:auto; white-space: normal; margin:2px 0; font-size: 5px'">
+                        <t t-foreach="stock_pickings" t-as="picking">
+                            <b>
+                                <span>Date:</span>
+                            </b>
+                            <t t-set="scheduled_date" t-value="picking.scheduled_date"/>
+                            <span t-esc="scheduled_date and o.env['ir.qweb.field.date'].value_to_html(scheduled_date, {}) or ''"/>
+                        </t>
+                    </div>
+                </t>
+
+            </div>
+        </xpath>
+        <xpath expr="//div[contains(@t-att-style, 'position:relative')]" position="inside">
+            <t t-if="o.env['purchase.order'].browse(o.mapped('purchase_order_ids.id')).partner_id">
+                <div class="o_label_4x12" t-att-style="'width:auto; white-space: normal; margin:2px 0; font-size: 5px'">
+                    <b>
+                        <span>Supplier:</span>
+                    </b>
+                    <span t-field="o.env['purchase.order'].browse(o.mapped('purchase_order_ids.id')).partner_id.name"/>
+                </div>
+                <div class="o_label_4x12" t-att-style="'width:auto; white-space: normal; margin:2px 0; font-size: 5px'">
+                    <b>
+                        <span>PO No:</span>
+                    </b>
+                    <span t-field="o.env['purchase.order'].browse(o.mapped('purchase_order_ids.id')).name"/>
+                </div>
+            </t>
+            <t t-elif="o.env['stock.picking'].browse(o.mapped('stock_valuation_layer_ids.stock_move_id.picking_id.id')).partner_id">
+                <div class="o_label_4x12" t-att-style="'width:auto; white-space: normal; margin:2px 0; font-size: 5px'">
+                    <t t-foreach="o.env['stock.picking'].browse(o.mapped('stock_valuation_layer_ids.stock_move_id.picking_id.id'))"
+                       t-as="picking">
+                        <b>
+                            <span>Supplier:</span>
+                        </b>
+                        <span t-field="picking.partner_id.name"/>
+                    </t>
+                </div>
+            </t>
+        </xpath>
+    </template>
+    <template id="stock.label_lot_template_view">
+        <t t-foreach="docs" t-as="lot">
+            <t t-translation="off">
+                ^XA
+                ^FO670,10^GFA,1500,1500,15,,::::::P01JFE,P0KFC,O01JFE01FC,O01JFC03FF8,O01JF801IF,O01JF800IFC,O01JFI0JF,::O01JFI0IFE,O01JF800IFE,O01JF801IFC,O01JFC03IF8,O01KF07IF8,O01PF,:O01OFE,O01OFC,O01IF87JFC,O01IF803IF8,O01IF003IF8,O01FFE003IF,O01FFE007IF,O01FFC007FFE,O01FFC00IFC,O01FF800IFC,O01FF801IF8,O01FF001IF8,O01FF003IF,O01FE003IF,O01FE007FFE,O01FC007FFC,O01FC00IFC,O01F800IF8,O01F801IF8,O01F001IF,O01F003FFE,O01E003FFE,O01C007FFC,S07FFC,S07FF8,S0IF8,S0IF,R01FFE,:R03FFC,:R07FF8,R07FF,R0IF,R0FFC,R0FF,,:::::::::::0F3C3CF0FC3C3C1F83C3879FF383C,0F3E3CF1FF3C3C3FE3C7879FF3C3C,0F3E3CF3FF3C3C7FF3C7CF9FF3E3C,0F3F3CF3E73C3CIF3E7CF1E03F3C,0F3FBCF3E03C3CF0F9E7CF1E03F3C,0F3FFCF1FC3FFCF079EFCF1FE3FFC,0F3FFCF1FE3FFCF079EFEE1FE3FFC,0F3FFCF07F3FFCF078FEFE1FE3FFC,0F3CFCF00F3C3CF0F8FEFE1E03DFC,0F3CFCF38F3C3CFDF8FCFC1E03CFC,0F3C7CF3FF3C3C7FF07C7C1FF3C7C,0F3C3CF3FF3C3C3FE07C7C1FF3C7C,0F3C3CF1FE3C3C1FC07C7C1FF3C3C,,::::::N0192624118C483,N010A426110A4C4,N0116525110C4A48,N018230I182023,,::::^FS
+                ^CI28
+                ^FO60,150
+                ^A0N,30,25^FD<t t-out="lot['display_name_markup']"/>^FS
+                ^FO60,180
+                ^A0N,30,25^FDLN/SN:<t t-out="lot['name']"/>^FS
+                ^FO560,180
+                ^A0N,30,25^FDDATE:<t t-out="lot['document_date']"/>^FS
+                <t t-if="env.user.has_group('stock.group_stock_lot_print_gs1')">
+                    <t t-set="final_barcode" t-value="''"/>
+                    <t t-if="lot['lot_record'].product_id.valid_ean"
+                       t-set="final_barcode"
+                       t-value="'01' + lot['lot_record'].product_id.barcode.zfill(14)"/>
+                    <t t-if="lot['lot_record'].product_id.tracking == 'lot'"
+                       t-set="final_barcode"
+                       t-value="final_barcode + '10' + lot['name']"/>
+                    <t t-elif="lot['lot_record'].product_id.tracking == 'serial'"
+                       t-set="final_barcode"
+                       t-value="final_barcode + '21' + lot['name']"/>
+                    ^FO425,220^BY3
+                    ^BXN,8,200
+                    ^FD<t t-out="final_barcode"/>^FS
+                </t>
+                <t t-else="" name="code128_barcode">
+                    ^FO60,220^BY3
+                    ^BCN,100,Y,N,N
+                    ^FD<t t-out="lot['name']"/>^FS
+                </t>
+                ^FO60,380
+                        ^A0N,30,25^FDSUPPLIER: <t t-out="lot['supplier']"/>^FS
+                <t t-if="lot['po_number']">
+                    ^FO60,420
+                        ^A0N,30,25^FDPO NO: <t t-out="lot['po_number']"/>^FS
+                </t>
+                ^XZ
+            </t>
+        </t>
+    </template>
+</odoo>
